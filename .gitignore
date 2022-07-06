@@ -1,3 +1,4 @@
 data
 GCN.PyTorch
 dataset.pt
+__pycache__

@@ -1,3 +1,4 @@
+import pdb
 import torch
 import torch.nn as nn
 from models import WeightDrop
@@ -16,7 +17,7 @@ class Linear(nn.Module):
 
 
 linear = Linear()
-
+pdb.set_trace()
 bayesian = WeightDrop(torch.nn.Linear(12, 1), ['weight'], dropout=0.4)
 
 
