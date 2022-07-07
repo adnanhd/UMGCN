@@ -2,3 +2,4 @@ data
 GCN.PyTorch
 dataset.pt
 __pycache__
+wandb/

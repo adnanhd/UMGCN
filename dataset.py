@@ -31,12 +31,12 @@ class dataBuild(Dataset):
         pass
 
     @staticmethod
-    def sample_mask(idx, l):
-        mask = np.zeros(l)
+    def sample_mask(idx, size: tuple):
+        mask = np.zeros(size)
         mask[idx] = 1
         return np.array(mask, dtype=np.bool)
 
-    def __len__():
+    def __len__(self):
         pass
 
     def loadData(self, objects):
@@ -82,7 +82,8 @@ class dataBuild(Dataset):
         y_test[test_mask, :] = labels[test_mask, :]
         features = torch.from_numpy(self.process_features(features))
         y_train, y_val, y_test, train_mask, val_mask, test_mask = \
-            torch.from_numpy(y_train), torch.from_numpy(y_val), torch.from_numpy(y_test), \
-            torch.from_numpy(train_mask), torch.from_numpy(
-                val_mask), torch.from_numpy(test_mask)
-        return adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask
+            torch.from_numpy(y_train), torch.from_numpy(y_val), \
+            torch.from_numpy(y_test), torch.from_numpy(train_mask), \
+            torch.from_numpy(val_mask), torch.from_numpy(test_mask)
+        return adj, features, y_train, y_val, y_test, \
+            train_mask, val_mask, test_mask

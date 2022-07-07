@@ -28,10 +28,10 @@ def Uncertainty(gcn_output):
 
 
 def KL_Divergence(input, target):
-    return torch.sum(target.exp() * (target - input), 1)
+    return torch.sum(target * (target.exp() - input), 1)
 
 
-def Wasserstein_Metric(gcn_output, fc_output):
+def Wasserstein(gcn_output, fc_output):
     minus_alpha = torch.log(1 + Uncertainty(gcn_output))
     # print(minus_alpha.min(), minus_alpha.max())
     beta = torch.softmax(minus_alpha - minus_alpha.min() + 1e-8, dim=0)

@@ -1,6 +1,7 @@
 from torch_geometric.nn import GCNConv
 import torch.nn as nn
 import torch.nn.functional as F
+from variational_dropout import VariationalDropout
 import torch
 
 
@@ -8,15 +9,15 @@ class WeightDrop(torch.nn.Module):
     def __init__(self, module, weights, dropout=0, variational=False):
         super(WeightDrop, self).__init__()
         self.module = module
-        state_dict = self.module.state_dict()
-        self.weights = {wname: state_dict[wname] for wname in weights}
+        self.weights = set(weights)
         self.dropout = dropout
         self.variational = variational
 
-    def _setweights(self):
+    def _drop_weights(self):
         state_dict = self.module.state_dict()
-        for name_w, raw_w in self.weights.items():
+        for name_w in self.weights:
             w = None
+            raw_w = state_dict[name_w]
             if self.variational:
                 mask = torch.autograd.Variable(torch.ones(raw_w.size(0), 1))
                 if raw_w.is_cuda:
@@ -31,7 +32,7 @@ class WeightDrop(torch.nn.Module):
         self.module.load_state_dict(state_dict)
 
     def forward(self, *args):
-        self._setweights()
+        self._drop_weights()
         return self.module.forward(*args)
 
 
@@ -48,7 +49,7 @@ class FullyConnected(torch.nn.Module):
         x = self.fc1(x)
         x = torch.tanh(x)
         x = self.fc2(x)
-        return x
+        return F.softmax(x, dim=1)
 
 
 class GraphConv(torch.nn.Module):
@@ -60,14 +61,12 @@ class GraphConv(torch.nn.Module):
                  dropout: float = 0.5,
                  inference: float = 0.0):
         super().__init__()
-        gcn_conv1 = GCNConv(in_channels, hidden_channels,
-                            cached=True, normalize=not use_gdc)
-        gcn_conv2 = GCNConv(hidden_channels, out_channels,
-                            cached=True, normalize=not use_gdc)
-        self.conv1 = WeightDrop(gcn_conv1, ['lin.weight'],
-                                dropout=inference, variational=True)
-        self.conv2 = WeightDrop(gcn_conv2, ['lin.weight'],
-                                dropout=inference, variational=True)
+        self.conv1 = GCNConv(in_channels, hidden_channels,
+                             cached=True, normalize=not use_gdc)
+        self.conv2 = GCNConv(hidden_channels, out_channels,
+                             cached=True, normalize=not use_gdc)
+        #self.conv1.lin = VariationalDropout(in_channels, hidden_channels)
+        #self.conv2.lin = VariationalDropout(hidden_channels, out_channels)
         self.p = dropout
 
     def forward(self, x, edge_index, edge_weight=None):
@@ -76,4 +75,4 @@ class GraphConv(torch.nn.Module):
         x = nn.functional.leaky_relu(x)
         x = F.dropout(x, p=self.p, training=self.training)
         x = self.conv2(x, edge_index, edge_weight)
-        return x
+        return F.softmax(x, dim=1)
