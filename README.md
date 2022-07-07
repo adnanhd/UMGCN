@@ -3,7 +3,6 @@
 ## Introduction
 This is a preliminary version paper, which was published in September 2020. It aims to defend the model from poisoning attacks using uncertainty-matching graph neural networks (UM-GNN). Our goal is to implement the UM-GNN defined in the paper.
 
-## Summaries
 ### 1.1
 Graph neural networks are known for their usage in challenging tasks with the graph structure. On the other hand, they are vulnerable to adversarial attacks as regular neural network models. In this paper, they have contributed a new approach and labeled it as uncertainty-matching graph neural networks (UM-GNN). This network is a combination of a GNN and FCN with specific regulations. The regulations are basically taking the output from both models after the training process while contributing a new loss, which consists of the GNN model uncertainty value additionally to enhance the model from poisoning attacks.
 
